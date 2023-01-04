@@ -26,7 +26,7 @@ namespace WinUI3_UnhandledExceptionTestApp
     //   A fail fast exception occurred. Exception handlers will not be invoked
     //   and the process will be terminated immediately.
     //
-    // However the app continues to run, the main window comes up and so on.
+    // HOWEVER THE APP CONTINUES TO RUN, the main window comes up and so on.
     // None of our three 'UnhandledException' handlers get called.
     //
 
@@ -41,7 +41,7 @@ namespace WinUI3_UnhandledExceptionTestApp
     // This determines whether, when an Unhandled Exception is caught,
     // we set the 'Handled' property of the UnhandledExceptionEventArgs to 'true'.
 
-    public static bool ShouldContinueExecutionAfterUnhandledException = true ;
+    public static bool ShouldContinueExecutionAfterUnhandledException = false ;
 
     public App ( )
     {
