@@ -9,13 +9,13 @@ namespace WinUI3_UnhandledExceptionTestApp
   // in the project settings, so that we won't get a Debug.Break if an exception
   // does get handled. Instead, the unhandled exception will just be handled here. 
 
-  // Build and run the app with Debug/x64 to demonstrate the issue.
+  // Build and run the app with Debug/x64 to demonstrate the issues.
 
   public partial class App : Microsoft.UI.Xaml.Application
   {
 
     //
-    // If we set this to true, our handler isn't called ; a couple of message boxes appear
+    // If we set this to true, a couple of message boxes appear
     // telling us that the app will terminate immediately ...
     // 
     //   Unhandled exception at 0x00007FFCC94D1C9F (combase.dll)
@@ -26,7 +26,13 @@ namespace WinUI3_UnhandledExceptionTestApp
     // None of our three 'UnhandledException' handlers get called.
     //
 
-    public static bool ThrowExceptionInAppConstructor = true ; // DOESN'T WORK AS YOU'D EXPECT !!!
+    //
+    // See also, click handlers in MainWindow.xaml.cs which demonstrate some other issues.
+    //
+
+    public static bool ThrowExceptionInAppConstructor = false ; // DOESN'T WORK AS YOU'D EXPECT !!!
+
+    public static bool HandledValue_ToSetInUnhandledExceptionEventHandlers = false ;
 
     public App ( )
     {
@@ -41,9 +47,12 @@ namespace WinUI3_UnhandledExceptionTestApp
         object                                        sender, 
         Microsoft.UI.Xaml.UnhandledExceptionEventArgs unhandledExceptionEventArgs 
       ) => {
+        // This handler gets called, but even if we leave 'Handled' set to false,
+        // the app continues to run - whereas we expect is to terminate.
         System.Diagnostics.Debug.WriteLine(  
           $"App.UnhandledException : '{unhandledExceptionEventArgs.Exception.Message}'"
         ) ;
+        unhandledExceptionEventArgs.Handled = HandledValue_ToSetInUnhandledExceptionEventHandlers ;
       } ;
 
       Microsoft.UI.Xaml.Application.Current.UnhandledException += (
@@ -51,17 +60,18 @@ namespace WinUI3_UnhandledExceptionTestApp
         Microsoft.UI.Xaml.UnhandledExceptionEventArgs unhandledExceptionEventArgs 
       ) => {
         // This handler does get called, but only in the same circumstances as App.UnhandledException.
-        // And it only tells us 'Error in the application' ; the Message from the thrown exception isn't available.
         System.Diagnostics.Debug.WriteLine(  
           $"Microsoft.UI.Xaml.Application.Current.UnhandledException : '{unhandledExceptionEventArgs.Exception.Message}'"
         ) ;
+        unhandledExceptionEventArgs.Handled = HandledValue_ToSetInUnhandledExceptionEventHandlers ;
       } ;
 
       System.AppDomain.CurrentDomain.UnhandledException += (
         object                             sender, 
         System.UnhandledExceptionEventArgs unhandledExceptionEventArgs
       ) => {
-        // We've never seen this being called ...
+        // This handler gets called only when we've thrown an exception from 'myButtonThrowAsync_Click'.
+        // The application then terminates.
         System.Diagnostics.Debug.WriteLine(  
           $"AppDomain.CurrentDomain.UnhandledException raised : {unhandledExceptionEventArgs.ExceptionObject} {unhandledExceptionEventArgs.IsTerminating}"
         ) ;
